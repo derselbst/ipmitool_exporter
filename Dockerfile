@@ -17,9 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Clone and build ipmitool
 # Note: SSL verification disabled due to Docker build environment certificate issues
 RUN git config --global http.sslVerify false && \
-    git clone https://github.com/ipmitool/ipmitool.git /tmp/ipmitool
+    git clone https://codeberg.org/IPMITool/ipmitool.git /tmp/ipmitool
 WORKDIR /tmp/ipmitool
-RUN ./bootstrap && \
+RUN git checkout 7727519a666892bde047e23aa2ac290cd858f5c6 && \
+    ./bootstrap && \
     ./configure --prefix=/usr && \
     make && \
     make install DESTDIR=/ipmitool-root
