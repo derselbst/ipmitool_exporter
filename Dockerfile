@@ -34,11 +34,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -o ipmi_exporter .
 # Stage 3: Final image
 FROM debian:trixie-slim
 # Install runtime dependencies for ipmitool
-# Note: libssl1.1 is specific to Debian Bullseye; update if base image changes
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl1.1 \
-    libreadline8 \
-    && rm -rf /var/lib/apt/lists/*
+    libssl-dev \
+    libreadline-dev
 WORKDIR /root/
 COPY --from=ipmitool-builder /ipmitool-root/usr /usr
 COPY --from=go-builder /build/ipmi_exporter ./
