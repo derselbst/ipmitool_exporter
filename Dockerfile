@@ -1,10 +1,42 @@
-FROM golang:1.16
+# Stage 1: Build ipmitool from source
+FROM debian:bullseye-slim AS ipmitool-builder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    git \
+    autoconf \
+    automake \
+    libtool \
+    make \
+    gcc \
+    g++ \
+    pkg-config \
+    libssl-dev \
+    libreadline-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build ipmitool
+RUN git config --global http.sslVerify false && \
+    git clone https://github.com/ipmitool/ipmitool.git /tmp/ipmitool
+WORKDIR /tmp/ipmitool
+RUN ./bootstrap && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install DESTDIR=/ipmitool-root
+
+# Stage 2: Build the Go exporter
+FROM golang:1.16 AS go-builder
 ADD . / /build/
 WORKDIR /build
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o ipmi_exporter .
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -o ipmi_exporter .
 
-FROM alpine:latest  
-RUN apk --no-cache add ipmitool
+# Stage 3: Final image
+FROM debian:bullseye-slim
+# Install runtime dependencies for ipmitool
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libssl1.1 \
+    libreadline8 \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /root/
-COPY --from=0 /build/ipmi_exporter ./
+COPY --from=ipmitool-builder /ipmitool-root/usr /usr
+COPY --from=go-builder /build/ipmi_exporter ./
 CMD ["./ipmi_exporter"]  
