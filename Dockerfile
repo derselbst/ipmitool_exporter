@@ -2,6 +2,7 @@
 FROM debian:trixie-slim AS ipmitool-builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    wget \
     git \
     autoconf \
     automake \
@@ -24,6 +25,11 @@ RUN git checkout 7727519a666892bde047e23aa2ac290cd858f5c6 && \
     ./configure --prefix=/usr && \
     make && \
     make install DESTDIR=/ipmitool-root
+
+# This is to fix error:
+# IANA PEN registry open failed: No such file or directory
+RUN mkdir -p /ipmitool-root/usr/share/misc/
+RUN wget -O /ipmitool-root/usr/share/misc/enterprise-numbers.txt https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
 
 # Stage 2: Build the Go exporter
 FROM golang:1.24 AS go-builder
