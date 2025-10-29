@@ -26,7 +26,7 @@ RUN git checkout 7727519a666892bde047e23aa2ac290cd858f5c6 && \
     make install DESTDIR=/ipmitool-root
 
 # Stage 2: Build the Go exporter
-FROM golang:1.16 AS go-builder
+FROM golang:1.24 AS go-builder
 ADD . / /build/
 WORKDIR /build
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -o ipmi_exporter .
