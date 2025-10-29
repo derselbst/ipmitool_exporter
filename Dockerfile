@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone and build ipmitool
+# Note: SSL verification disabled due to Docker build environment certificate issues
 RUN git config --global http.sslVerify false && \
     git clone https://github.com/ipmitool/ipmitool.git /tmp/ipmitool
 WORKDIR /tmp/ipmitool
@@ -32,6 +33,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -o ipmi_exporter .
 # Stage 3: Final image
 FROM debian:bullseye-slim
 # Install runtime dependencies for ipmitool
+# Note: libssl1.1 is specific to Debian Bullseye; update if base image changes
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl1.1 \
     libreadline8 \
