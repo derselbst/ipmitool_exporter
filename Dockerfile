@@ -1,5 +1,5 @@
 # Stage 1: Build ipmitool from source
-FROM debian:bullseye-slim AS ipmitool-builder
+FROM debian:trixie-slim AS ipmitool-builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     git \
@@ -32,7 +32,7 @@ WORKDIR /build
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -o ipmi_exporter .
 
 # Stage 3: Final image
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 # Install runtime dependencies for ipmitool
 # Note: libssl1.1 is specific to Debian Bullseye; update if base image changes
 RUN apt-get update && apt-get install -y --no-install-recommends \
