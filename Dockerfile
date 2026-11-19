@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN git config --global http.sslVerify false && \
     git clone https://codeberg.org/IPMITool/ipmitool.git /tmp/ipmitool
 WORKDIR /tmp/ipmitool
-RUN git checkout 7727519a666892bde047e23aa2ac290cd858f5c6 && \
+RUN git checkout d62a996c8bad7b3f8d67ffe3742985a3c96ed218 && \
     ./bootstrap && \
     ./configure --prefix=/usr && \
     make && \
@@ -29,10 +29,10 @@ RUN git checkout 7727519a666892bde047e23aa2ac290cd858f5c6 && \
 # This is to fix error:
 # IANA PEN registry open failed: No such file or directory
 RUN mkdir -p /ipmitool-root/usr/share/misc/
-RUN wget -O /ipmitool-root/usr/share/misc/enterprise-numbers.txt https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
+RUN wget --no-check-certificate -O /ipmitool-root/usr/share/misc/enterprise-numbers.txt https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
 
 # Stage 2: Build the Go exporter
-FROM golang:1.24 AS go-builder
+FROM golang:1.27 AS go-builder
 ADD . / /build/
 WORKDIR /build
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -o ipmi_exporter .
